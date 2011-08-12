@@ -7,6 +7,7 @@ gem 'rails', '3.1.0.rc5'
 
 gem 'youtube-g'
 gem 'xml-simple'
+gem 'bson_ext'
 gem 'mongo_mapper'
 
 
