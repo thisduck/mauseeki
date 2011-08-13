@@ -1,6 +1,7 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://jashkenas.github.com/coffee-script/
+# 4e4632317c8f001fb300003f
 
 window.mauseeki = {}
 mauseeki = window.mauseeki
@@ -9,6 +10,13 @@ mauseeki.format_time = (time) ->
   sec = time % 60
   sec = if sec < 10 then "0" + sec else sec
   min + ":" + sec
+
+mauseeki.template =
+  cache: {}
+  get: (name) -> $("#tmpl_#{name}").html()
+  $: (name, data = {}) ->
+    @cache[name] ||= Handlebars.compile(@get name)
+    $(@cache[name](data))
 
 mauseeki.views = {}
 mauseeki.models = {}
@@ -22,12 +30,61 @@ class mauseeki.models.Clip extends Backbone.Model
 class mauseeki.models.Clips extends Backbone.Collection
   model: mauseeki.models.Clip
 
-mauseeki.template =
-  cache: {}
-  get: (name) -> $("#tmpl_#{name}").html()
-  $: (name, data = {}) ->
-    @cache[name] ||= Handlebars.compile(@get name)
-    $(@cache[name](data))
+class mauseeki.models.List extends Backbone.Model
+  default_name: "name this list..."
+  initialize: ->
+    @clips = new mauseeki.models.Clips
+
+  toJSON: ->
+    json = Backbone.Model.prototype.toJSON.call(@)
+    json.name = @default_name if !json.name or json.name.match /^unnamed/
+    json
+
+  add_clip: (clip) ->
+    $.ajax
+      url: '/lists/add_clip'
+      data:
+        list_id: @id || ""
+        clip: clip.toJSON()
+
+      success: (data) =>
+        clip = @clips.get(data.clip.id)
+        if !clip
+          @clips.add(data.clip)
+        else
+          clip.set(data.clip)
+
+        @.set(data.list)
+
+      dataType: 'json'
+      type: 'post'
+
+  load: ->
+    return if !@id
+
+    $.ajax
+      url: "/lists/#{@id}"
+      data: {load: 1}
+      success: (data) =>
+        @set data.list
+        @clips.reset data.clips
+      dataType: 'json'
+      type: 'get'
+
+  save_list: (name) ->
+    return if !@id
+
+    return if name == @default_name
+    $.ajax
+      url: '/lists/' + @id + '/save',
+      data:
+        list: {name: name}
+      success: (data) => @set data
+      dataType: 'json'
+      type: 'post'
+
+class mauseeki.models.Lists extends Backbone.Collection
+  model: mauseeki.models.List
 
 class mauseeki.views.FinderView extends Backbone.View
   last_value: ""
@@ -35,7 +92,7 @@ class mauseeki.views.FinderView extends Backbone.View
     'keyup #find': 'look'
     'click .clear': 'clear'
 
-  initialize: ->
+  initialize: (options = {}) ->
     _.bindAll @, "reset_clips", "add_clip", "run_search", "clear"
     $(@el).html mauseeki.template.$("finder")
     @find = @$("#find").focus()
@@ -44,6 +101,8 @@ class mauseeki.views.FinderView extends Backbone.View
     @clips = new mauseeki.models.Clips
     @clips.bind "reset", @reset_clips
     @clips.bind "add", @add_clip
+
+    @list = options.list
 
   look: -> 
     value = $.trim @find.val()
@@ -88,7 +147,7 @@ class mauseeki.views.FinderView extends Backbone.View
     clips.each @add_clip
 
   add_clip: (clip) ->
-    view = new mauseeki.views.ClipView model: clip
+    view = new mauseeki.views.ClipView model: clip, list: @list
     @$("#results").append view.el
 
 
@@ -138,10 +197,11 @@ class mauseeki.views.ClipView extends Backbone.View
     'click .pause': 'pause'
     'click .status': 'seek'
     'click .video': 'video'
+    'click .add': 'add'
     'mousemove .status': 'show_timetip'
     'mouseout .status': 'hide_timetip'
 
-  initialize: -> 
+  initialize: (options = {}) ->
     _.bindAll @, "playing"
 
     $(@el).html mauseeki.template.$ "clip", @model.toJSON()
@@ -149,6 +209,8 @@ class mauseeki.views.ClipView extends Backbone.View
 
     @player = mauseeki.player
     @player.bind "playing", @playing
+
+    @list = options.list
 
   play: ->
     #TODO: make trigger
@@ -218,3 +280,75 @@ class mauseeki.views.ClipView extends Backbone.View
 
     @pause() if playing == 1 && player.getPlayerState() == 0
 
+  add: -> @list.add_clip(@model) if @list
+
+class mauseeki.views.ListView extends Backbone.View
+  list_id: undefined
+  events:
+    "click .save-list": "save_list"
+
+  initialize: -> 
+    _.bindAll @, 'add_clip', 'reset_clips', 'relist'
+
+    $(@el).html mauseeki.template.$ "list", @model.toJSON()
+    if !@model.get("name")
+      @$(".list-name").hide()
+      @$(".list-controls").hide()
+
+    @model.bind "change", @relist
+
+    @clips = @model.clips
+    @clips.bind 'add', this.add_clip
+    @clips.bind 'reset', this.reset_clips
+
+    @model.load()
+
+  relist: ->
+    name = @model.get "name"
+    if name
+      @$(".list-name").text(@model.get "name").show()
+
+    if @model.get "saved"
+      @$(".list-controls").hide()
+      mauseeki.app.navigate "lists/#{@model.id}-#{@model.get "name"}"
+    else
+      @$(".list-controls").show()
+
+  save_list: ->
+    name = $.trim @$(".list-controls input").val()
+    @model.save_list(name)
+
+  add_clip: (clip) ->
+    view = new mauseeki.views.ClipView model: clip
+    @$(".clips").append view.el
+
+  reset_clips: ->
+    @$(".clips").empty()
+    @clips.each @add_clip
+
+class mauseeki.App extends Backbone.Router
+  routes:
+    "": "home"
+    "lists/:id-:name": "list"
+
+  initialize: ->
+    # setup the app here
+    mauseeki.player = new mauseeki.views.PlayerView
+
+  home: ->
+    list = new mauseeki.models.List
+    list_view = new mauseeki.views.ListView model: list
+    $("#container").append list_view.el
+
+    finder_view = new mauseeki.views.FinderView list: list
+    $("#container").append finder_view.el
+    finder_view.$("#find").focus()
+
+  list: (id, name) ->
+    list = new mauseeki.models.List id: id
+    list_view = new mauseeki.views.ListView model: list
+    $("#container").append list_view.el
+
+    finder_view = new mauseeki.views.FinderView list: list
+    $("#container").append finder_view.el
+    finder_view.$("#find").focus()

@@ -15,9 +15,10 @@ class ListsController < ApplicationController
   def show
     @list = List.find(params[:id])
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @list }
+    if params[:load]
+      return render json: {list: @list, clips: @list.clips}
+    else
+      return render json: @list
     end
   end
 

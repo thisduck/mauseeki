@@ -35,29 +35,37 @@
 </script>
 
 <script id="tmpl_clip" type="text/html">
-    <h2>{{title}}</h2>
-    <div class="status">
-      <div class="loaded"></div>
-      <div class="playing"></div>
-    </div>
-    <div class="controls">
-      <button class='play' value="play" alt="play" />
-      <button class='pause' value="pause" alt="pause" style="display: none"/>
-      <button class='video' value="video" alt="show video" />
-      {{^id}}
-        <button class='add' value="add to list" alt="add to list" />
-      {{/id}}
-    </div>
-    <div class='time'>{{time}}</div>
-    <div class="time_display" style="display: none;">0:00</div>
+  <h2>{{title}}</h2>
+  <div class="status">
+    <div class="loaded"></div>
+    <div class="playing"></div>
+  </div>
+  <div class="controls">
+    <button class='play' value="play" alt="play" />
+    <button class='pause' value="pause" alt="pause" style="display: none"/>
+    <button class='video' value="video" alt="show video" />
+    {{^id}}
+      <button class='add' value="add to list" alt="add to list" />
+    {{/id}}
+  </div>
+  <div class='time'>{{time}}</div>
+  <div class="time_display" style="display: none;">0:00</div>
+</script>
+
+<script id="tmpl_list" type="text/html">
+  <h2 class="list-name">{{name}}</h2>
+  <div class="list-controls">
+    <input type="text" value="{{{name}}}" name="list[name]" id="list_name">
+    <button class="save-list" value="save list" />
+  </div>
+  <ul class="clips">
+  </ul>
 </script>
 
 <script type="text/javascript">
   $(function() {
-    var view = new mauseeki.views.FinderView;
-    $("#container").append(view.el);
-    view.$("#find").focus();
-
-    mauseeki.player = new mauseeki.views.PlayerView;
+    mauseeki.app = new mauseeki.App();
+    //Backbone.history.start({pushState: true});
+    Backbone.history.start();
   });
 </script>
