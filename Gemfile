@@ -14,6 +14,7 @@ gem 'mongo_mapper'
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
+  gem 'tilt', :git => 'git://github.com/rtomayko/tilt.git'
   gem 'sass-rails', "~> 3.1.0.rc"
   gem 'coffee-rails', "~> 3.1.0.rc"
   gem 'uglifier'

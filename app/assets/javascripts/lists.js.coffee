@@ -13,11 +13,19 @@ mauseeki = window.mauseeki
 
 mauseeki.views = {}
 mauseeki.models = {}
+
+mauseeki.template =
+  cache: {}
+  get: (name) -> $("#tmpl_#{name}").html()
+  $: (name, data = {}) ->
+    @cache[name] ||= Handlebars.compile(@get name)
+    $(@cache[name](data))
+
 class mauseeki.views.FinderView extends Backbone.View
   events: {
   }
   initialize: ->
-    $(@el).html $("#tmpl_finder").html()
+    $(@el).html mauseeki.template.$("finder")
     @find = @$("#find")
 
     #this.clips_view = new mauseeki.views.ClipListView({el : this.$(".finder-list")});
@@ -54,3 +62,25 @@ class mauseeki.views.FinderView extends Backbone.View
       type: 'get'
 
   hide_autocomplete: -> @find.autocomplete('widget').hide()
+
+class mauseeki.views.PlayerView extends Backbone.View
+  player: undefined,
+  initialize: ->
+    _.bindAll @, 'update_player'
+    $(@el).html mauseeki.template.$("player")
+
+    window.onYouTubePlayerReady = (player_id) =>
+      @player = document.getElementById 'ytplayer'
+      @player.setVolume(100)
+      setInterval @update_player, 350
+
+    oid = "W1L1cE4Qez0"
+    swfobject.embedSWF("http://www.youtube.com/v/#{oid}?enablejsapi=1&playerapiid=ytplayer",
+    'ytdiv', "640", "360", "9", null, {}, {allowScriptAccess: "always"}, {id: "ytplayer"})
+
+  update_player: ->
+  load: (id) -> @player.loadVideoById id, 0, "small"
+  current_id: -> @player.getVideoUrl().match(/v=(.*)&/)[1]
+  seek: (time) -> @player.seekTo time, true
+  play: -> @player.playVideo()
+  pause: -> @player.pauseVideo()

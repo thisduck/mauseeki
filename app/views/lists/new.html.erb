@@ -15,9 +15,19 @@
   </div>
 </script>
 
+<script type="text/html" id="tmpl_player">
+  <div class="yt_holder">
+    <div id="ytdiv" style="display: none;">
+    </div>
+  </div>
+</script>
+
 <script type="text/javascript">
   $(function() {
-    var view = new mauseeki.views.FinderView({});
+    var view = new mauseeki.views.FinderView;
     $("#container").append(view.el);
+
+    mauseeki.player = new mauseeki.views.PlayerView;
+    $("body").append(mauseeki.player.el);
   });
 </script>
