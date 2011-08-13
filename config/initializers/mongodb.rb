@@ -1,5 +1,5 @@
 if ENV['MONGOLAB_URI']
-  MongoMapper.config = {Rails.env => {'uri' => ENV['MONGOLAB_URL']}}
+  MongoMapper.config = {Rails.env => {'uri' => ENV['MONGOLAB_URI']}}
   MongoMapper.connect(Rails.env)
 else
   logger = ENV['LOG_MONGO'] ? Rails.logger : nil
