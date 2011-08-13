@@ -22,12 +22,29 @@
   </div>
 </script>
 
+<script id="tmpl_clip" type="text/html">
+    <h2>{{title}}</h2>
+    <div class="status">
+      <div class="loaded"></div>
+      <div class="playing"></div>
+    </div>
+    <div class="controls">
+      <a href='#' class='mbutton play'>play</a>
+      <a href='#' class='mbutton pause' style="display: none">pause</a>
+      <a href='#' class='mbutton video' style="display: none">video</a>
+      {{^id}}
+        <a href='#' class='mbutton add'>add to list</a>
+      {{/id}}
+      <div class='mbutton time'>{{time}}</a>
+    </div>
+    <div class="time_display" style="display: none;">0:00</div>
+</script>
+
 <script type="text/javascript">
   $(function() {
     var view = new mauseeki.views.FinderView;
     $("#container").append(view.el);
 
     mauseeki.player = new mauseeki.views.PlayerView;
-    $("body").append(mauseeki.player.el);
   });
 </script>

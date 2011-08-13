@@ -4,15 +4,23 @@
 
 window.mauseeki = {}
 mauseeki = window.mauseeki
-# mauseeki.format_time = function(time) {
-#   var min = parseInt(time / 60);
-#   var sec = time % 60;
-#   sec = (sec < 10) ? "0" + sec : sec;
-#   return min + ":" + sec;
-# };
+mauseeki.format_time = (time) ->
+  min = parseInt time/60
+  sec = time % 60
+  sec = if sec < 10 then "0" + sec else sec
+  min + ":" + sec
 
 mauseeki.views = {}
 mauseeki.models = {}
+
+class mauseeki.models.Clip extends Backbone.Model
+  toJSON: ->
+    json = Backbone.Model.prototype.toJSON.call(@)
+    json.time = mauseeki.format_time @get "length"
+    json
+
+class mauseeki.models.Clips extends Backbone.Collection
+  model: mauseeki.models.Clip
 
 mauseeki.template =
   cache: {}
@@ -22,14 +30,15 @@ mauseeki.template =
     $(@cache[name](data))
 
 class mauseeki.views.FinderView extends Backbone.View
-  events: {
-  }
+  events: {}
   initialize: ->
+    _.bindAll @, "reset_clips", "add_clip"
     $(@el).html mauseeki.template.$("finder")
     @find = @$("#find")
 
-    #this.clips_view = new mauseeki.views.ClipListView({el : this.$(".finder-list")});
-    #this.clips_view.set_finder(this);
+    @clips = new mauseeki.models.Clips
+    @clips.bind "reset", @reset_clips
+    @clips.bind "add", @add_clip
 
     @find.autocomplete(
       source: "/clips/livesuggest"
@@ -53,7 +62,7 @@ class mauseeki.views.FinderView extends Backbone.View
       url: '/clips/search'
       data: { query: query }
       success: (data) =>
-        #@clips_view.clips.refresh(data)
+        @clips.reset(data)
         @hide_autocomplete()
         @results_string = query
         #console.log(@clips_view.clips.length)
@@ -62,25 +71,76 @@ class mauseeki.views.FinderView extends Backbone.View
       type: 'get'
 
   hide_autocomplete: -> @find.autocomplete('widget').hide()
+  reset_clips: (clips) ->
+    @$("#results").empty()
+    clips.each @add_clip
+
+  add_clip: (clip) ->
+    view = new mauseeki.views.ClipView model: clip
+    @$("#results").append view.el
+
 
 class mauseeki.views.PlayerView extends Backbone.View
-  player: undefined,
+  player: undefined
   initialize: ->
-    _.bindAll @, 'update_player'
+    _.bindAll @, 'playing'
     $(@el).html mauseeki.template.$("player")
+    $("body").append @el
 
     window.onYouTubePlayerReady = (player_id) =>
       @player = document.getElementById 'ytplayer'
       @player.setVolume(100)
-      setInterval @update_player, 350
+      setInterval @playing, 10
 
     oid = "W1L1cE4Qez0"
     swfobject.embedSWF("http://www.youtube.com/v/#{oid}?enablejsapi=1&playerapiid=ytplayer",
     'ytdiv', "640", "360", "9", null, {}, {allowScriptAccess: "always"}, {id: "ytplayer"})
 
-  update_player: ->
-  load: (id) -> @player.loadVideoById id, 0, "small"
+  playing: -> @trigger "playing", @current_id()
+
   current_id: -> @player.getVideoUrl().match(/v=(.*)&/)[1]
-  seek: (time) -> @player.seekTo time, true
-  play: -> @player.playVideo()
-  pause: -> @player.pauseVideo()
+
+  load: (id) -> 
+    return @ if @current_id() == id
+    @player.loadVideoById id, 0, "small"
+    @
+
+  seek: (time) -> @player.seekTo time, true; @
+  play: -> @player.playVideo(); @
+  pause: -> @player.pauseVideo(); @
+
+class mauseeki.views.ClipView extends Backbone.View
+  tagName: 'li'
+
+  events:
+    'click .play': 'play'
+    'click .pause': 'pause'
+
+  initialize: -> 
+    _.bindAll @, "playing"
+
+    $(@el).html mauseeki.template.$ "clip", @model.toJSON()
+    @id = @model.get("source_id")
+
+    @player = mauseeki.player
+    @player.bind "playing", @playing
+
+  play: ->
+    @player.load(@id).play()
+    @$(".pause").show()
+    @$(".play").hide()
+    false
+
+  pause: ->
+    @player.pause()
+    @$(".pause").hide()
+    @$(".play").show()
+    false
+
+  playing: (id) ->
+    return if @id != id
+    player = @player.player
+
+    current_time = mauseeki.format_time Math.round player.getCurrentTime()
+    length = mauseeki.format_time Math.round @model.get("length")
+    @$(".time").html "#{current_time} / #{length}"
