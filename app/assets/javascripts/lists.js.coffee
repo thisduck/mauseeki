@@ -111,6 +111,7 @@ class mauseeki.views.PlayerView extends Backbone.View
 
 class mauseeki.views.ClipView extends Backbone.View
   tagName: 'li'
+  className: 'clip'
 
   events:
     'click .play': 'play'
@@ -143,4 +144,22 @@ class mauseeki.views.ClipView extends Backbone.View
 
     current_time = mauseeki.format_time Math.round player.getCurrentTime()
     length = mauseeki.format_time Math.round @model.get("length")
-    @$(".time").html "#{current_time} / #{length}"
+    @$(".time").html("#{current_time} / #{length}").show()
+
+    w = @$('.status').width()
+    playing = player.getCurrentTime() / player.getDuration()
+    starting = player.getVideoStartBytes() / player.getVideoBytesTotal()
+    loaded = player.getVideoBytesLoaded() / player.getVideoBytesTotal()
+
+    sw = parseInt(w * starting)
+    lw = parseInt(w * loaded)
+    pw = parseInt(w * playing) - sw
+
+    @$(".playing").css "margin-left", sw if @$(".playing").css("margin-left") != sw
+    @$(".playing").width pw if @$(".playing").width() != pw
+
+    @$(".loaded").css "margin-left", sw if @$(".loaded").css("margin-left") != sw
+    @$(".loaded").width lw if @$(".loaded").width() != lw
+
+    @pause() if playing == 1 && player.getPlayerState() == 0
+

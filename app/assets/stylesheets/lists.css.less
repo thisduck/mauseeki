@@ -6,3 +6,51 @@ html {
   height: 0;
   overflow: hidden;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.clip {
+  width: 425px;
+  background: #F5F3EF;
+  padding: 10px;
+  margin: 10px 0px;
+  border: 1px solid #222;
+
+  h2 {
+    font-size: 12px;
+  }
+
+  .loaded, .playing {
+    width: 0;
+  }
+
+  .loaded {
+    background : gray;
+    height: 2px;
+  }
+
+  .playing {
+    background : lightgray;
+    margin-top: 2px;
+    height: 10px;
+  }
+
+  .time_display {
+    display: none;
+    z-index: 100;
+    background: black;
+    color: white; 
+    border: 1px solid gray;
+    font-size: 10px;
+    padding: 1px 2px;
+  }
+
+  .status {
+    background-color: #EFEFEF;
+    padding: 2px;
+  }
+
+}
