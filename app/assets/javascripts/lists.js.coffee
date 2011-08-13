@@ -122,6 +122,12 @@ class mauseeki.views.PlayerView extends Backbone.View
   seek: (time) -> @player.seekTo time, true; @
   play: -> @player.playVideo(); @
   pause: -> @player.pauseVideo(); @
+  toggle_video: ->
+    height = @$(".yt_holder").height()
+    if height == 0
+      @$(".yt_holder").height(400).css padding: 10
+    else
+      @$(".yt_holder").height(0).css padding: 0
 
 class mauseeki.views.ClipView extends Backbone.View
   tagName: 'li'
@@ -131,6 +137,7 @@ class mauseeki.views.ClipView extends Backbone.View
     'click .play': 'play'
     'click .pause': 'pause'
     'click .status': 'seek'
+    'click .video': 'video'
     'mousemove .status': 'show_timetip'
     'mouseout .status': 'hide_timetip'
 
@@ -151,18 +158,17 @@ class mauseeki.views.ClipView extends Backbone.View
     @player.pause().load(@id).play()
     @$(".pause").show()
     @$(".play").hide()
-    false
 
   pause: ->
     @player.pause()
     @$(".pause").hide()
     @$(".play").show()
-    false
 
   seek: ->
     return if @player.current_id() != @id
     @player.seek @hover_time
-    false
+
+  video: -> @player.toggle_video()
 
   show_timetip: (e) ->
     return if @player.current_id() != @id
