@@ -56,6 +56,7 @@ class mauseeki.models.List extends Backbone.Model
           clip.set(data.clip)
 
         @.set(data.list)
+        mauseeki.app.trigger "list_added", @
 
       dataType: 'json'
       type: 'post'
@@ -81,7 +82,9 @@ class mauseeki.models.List extends Backbone.Model
       url: '/lists/' + @id + '/save',
       data:
         list: {name: name}
-      success: (data) => @set data
+      success: (data) => 
+        @set data
+        mauseeki.app.trigger "list_added", @
       dataType: 'json'
       type: 'post'
 
@@ -346,9 +349,11 @@ class mauseeki.views.ListsView extends Backbone.View
     @lists.bind 'add', @persist
     @lists.bind 'reset', @persist
     @lists.bind 'remove', @persist
+    @lists.bind 'change', @persist
 
   persist: ->
     store.set "list_ids", @lists.pluck("id")
+    @render()
 
   render: ->
     $(@el).html mauseeki.template.$("lists")
@@ -358,7 +363,7 @@ class mauseeki.views.ListsView extends Backbone.View
 
   add_list: (list) ->
     json = list.toJSON()
-    template = "<li><a class='app-link' href='/lists/#{json.id}'>#{json.name}</a></li>"
+    template = "<li><a class='app-link' href='/lists/#{list.id}'>#{list.get "name"}</a></li>"
     console.log template
     console.log @ul.append template
 
@@ -369,19 +374,21 @@ class mauseeki.App extends Backbone.Router
     "lists/:id": "list"
 
   initialize: ->
+    _.bindAll @, "list_added"
     # setup the app here
     mauseeki.player = new mauseeki.views.PlayerView
 
-    lists = new mauseeki.models.Lists
+    @lists = new mauseeki.models.Lists
     list_ids = store.get "list_ids"
     array = []
     _.each list_ids, (id) ->
       list = new mauseeki.models.List id: id
       list.fetch(async: false)
       array.push list
-    lists.reset array
+    @lists.reset array
 
-    @lists_view = new mauseeki.views.ListsView lists: lists
+    @bind "list_added", @list_added
+    @lists_view = new mauseeki.views.ListsView lists: @lists
     $("#sidebar").append(@lists_view.render().el)
 
   home: ->
@@ -405,3 +412,10 @@ class mauseeki.App extends Backbone.Router
     finder_view = new mauseeki.views.FinderView list: list
     $("#main").append finder_view.el
     finder_view.$("#find").focus()
+
+  list_added: (list) ->
+    l = @lists.get(list.id)
+    if l
+      l.set(list.attributes)
+    else
+      @lists.add(list)
