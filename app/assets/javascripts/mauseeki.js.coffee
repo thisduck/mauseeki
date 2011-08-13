@@ -31,6 +31,7 @@ class mauseeki.models.Clips extends Backbone.Collection
   model: mauseeki.models.Clip
 
 class mauseeki.models.List extends Backbone.Model
+  urlRoot: '/lists'
   default_name: "name this list..."
   initialize: ->
     @clips = new mauseeki.models.Clips
@@ -59,12 +60,13 @@ class mauseeki.models.List extends Backbone.Model
       dataType: 'json'
       type: 'post'
 
-  load: ->
+  load: (sync) ->
     return if !@id
 
     $.ajax
       url: "/lists/#{@id}"
       data: {load: 1}
+      async: !sync,
       success: (data) =>
         @set data.list
         @clips.reset data.clips
@@ -84,6 +86,7 @@ class mauseeki.models.List extends Backbone.Model
       type: 'post'
 
 class mauseeki.models.Lists extends Backbone.Collection
+  url: '/lists'
   model: mauseeki.models.List
 
 class mauseeki.views.FinderView extends Backbone.View
@@ -93,7 +96,8 @@ class mauseeki.views.FinderView extends Backbone.View
     'click .clear': 'clear'
 
   initialize: (options = {}) ->
-    _.bindAll @, "reset_clips", "add_clip", "run_search", "clear"
+    _.bindAll @, "reset_clips", "add_clip", 
+      "run_search", "clear", "close_results"
     $(@el).html mauseeki.template.$("finder")
     @find = @$("#find").focus()
     @button = @$("button")
@@ -103,6 +107,11 @@ class mauseeki.views.FinderView extends Backbone.View
     @clips.bind "add", @add_clip
 
     @list = options.list
+    if @list
+      @list.clips.bind "add", @close_results
+      @list.clips.bind "reset", @close_results
+
+  close_results: -> @clear()
 
   look: -> 
     value = $.trim @find.val()
@@ -138,6 +147,7 @@ class mauseeki.views.FinderView extends Backbone.View
         @button.removeClass("loading").addClass("clear")
         @loading = undefined
         @clips.reset(data)
+        @$("#results").slideDown();
 
       dataType: 'json'
       type: 'get'
@@ -327,6 +337,30 @@ class mauseeki.views.ListView extends Backbone.View
     @clips.each @add_clip
 
 class mauseeki.views.ListsView extends Backbone.View
+  initialize: (options = {}) ->
+    _.bindAll @, 'persist', 'render', 'add_list'
+    console.log @ul
+
+    @lists = options.lists
+
+    @lists.bind 'add', @persist
+    @lists.bind 'reset', @persist
+    @lists.bind 'remove', @persist
+
+  persist: ->
+    store.set "list_ids", @lists.pluck("id")
+
+  render: ->
+    $(@el).html mauseeki.template.$("lists")
+    @ul = @$("#lists")
+    @lists.each @add_list
+    @
+
+  add_list: (list) ->
+    json = list.toJSON()
+    template = "<li><a class='app-link' href='/lists/#{json.id}'>#{json.name}</a></li>"
+    console.log template
+    console.log @ul.append template
 
 class mauseeki.App extends Backbone.Router
   routes:
@@ -338,7 +372,18 @@ class mauseeki.App extends Backbone.Router
     # setup the app here
     mauseeki.player = new mauseeki.views.PlayerView
 
-    lists_view = new mauseeki.views.ListsView
+    lists = new mauseeki.models.Lists
+    list_ids = store.get "list_ids"
+    array = []
+    _.each list_ids, (id) ->
+      list = new mauseeki.models.List id: id
+      list.fetch(async: false)
+      array.push list
+    lists.reset array
+
+    @lists_view = new mauseeki.views.ListsView lists: lists
+    $("#sidebar").append(@lists_view.render().el)
+
   home: ->
     $("#main").html("<h2 id='go-ahead'>Go Ahead, Make A List.</h2>")
 
@@ -355,8 +400,8 @@ class mauseeki.App extends Backbone.Router
 
     list = new mauseeki.models.List id: id
     list_view = new mauseeki.views.ListView model: list
-    $("#container").append list_view.el
+    $("#main").append list_view.el
 
     finder_view = new mauseeki.views.FinderView list: list
-    $("#container").append finder_view.el
+    $("#main").append finder_view.el
     finder_view.$("#find").focus()

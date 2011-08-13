@@ -13,12 +13,19 @@ class ListsController < ApplicationController
   # GET /lists/1
   # GET /lists/1.json
   def show
-    @list = List.find(params[:id])
+    respond_to do |format|
+      format.html do
+        render :new
+      end
+      format.json do 
+        @list = List.find(params[:id])
 
-    if params[:load]
-      return render json: {list: @list, clips: @list.clips}
-    else
-      return render json: @list
+        if params[:load]
+          return render json: {list: @list, clips: @list.clips}
+        else
+          return render json: @list
+        end
+      end
     end
   end
 

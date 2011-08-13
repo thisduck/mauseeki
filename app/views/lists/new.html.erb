@@ -66,10 +66,21 @@
   </ul>
 </script>
 
+<script id="tmpl_lists" type="text/html">
+  <h3>Your lists</h3>
+  <ul id="lists">
+  </ul>
+</script>
+
 <script type="text/javascript">
   $(function() {
     mauseeki.app = new mauseeki.App();
-    //Backbone.history.start({pushState: true});
-    Backbone.history.start();
+    Backbone.history.start({pushState: true});
+    //Backbone.history.start();
+    $("a.app-link").live("click", function() {
+      var href = $(this).attr("href").replace(/^\//, "");
+      mauseeki.app.navigate(href, true);
+      return false;
+    });
   });
 </script>
