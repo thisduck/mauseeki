@@ -68,19 +68,52 @@ ul {
     font-size: 12px;
   }
 
-  .loaded, .playing {
-    width: 0;
+  .status {
+    background-color: #EFEFEF;
+    padding: 2px;
+    margin-bottom: 10px;
+
+    .loaded, .playing {
+      width: 0;
+    }
+
+    .loaded {
+      background : gray;
+      height: 2px;
+    }
+
+    .playing {
+      background : lightgray;
+      margin-top: 2px;
+      height: 10px;
+    }
   }
 
-  .loaded {
-    background : gray;
-    height: 2px;
+  .controls {
+    display: inline;
+
+    button {
+      width: 24px;
+      height: 24px;
+      border: none;
+      margin-right: 10px;
+    }
+
+    .play {
+      background: url('/images/raster/black/play_18x24.png') transparent no-repeat right center;
+    }
+
+    .pause {
+      background: url('/images/raster/black/pause_18x24.png') transparent no-repeat right center;
+    }
+
+    .add {
+      background: url('/images/raster/black/plus_24x24.png') transparent no-repeat right center;
+    }
   }
 
-  .playing {
-    background : lightgray;
-    margin-top: 2px;
-    height: 10px;
+  .time {
+    float: right;
   }
 
   .time_display {
@@ -92,10 +125,4 @@ ul {
     font-size: 10px;
     padding: 1px 2px;
   }
-
-  .status {
-    background-color: #EFEFEF;
-    padding: 2px;
-  }
-
 }

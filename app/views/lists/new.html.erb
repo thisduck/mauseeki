@@ -1,6 +1,9 @@
 <div id="preload" style="display: none">
   <img src="/images/loader.gif" />
   <img src="/images/raster/black/x_14x14.png" />
+  <img src="/images/raster/black/play_18x24.png" />
+  <img src="/images/raster/black/pause_18x24.png" />
+  <img src="/images/raster/black/plus_24x24.png" />
 </div>
 
 <div id="container">
@@ -37,14 +40,14 @@
       <div class="playing"></div>
     </div>
     <div class="controls">
-      <a href='#' class='mbutton play'>play</a>
-      <a href='#' class='mbutton pause' style="display: none">pause</a>
-      <a href='#' class='mbutton video' style="display: none">video</a>
+      <button class='play' value="play" alt="play" />
+      <button class='pause' value="pause" alt="pause" style="display: none"/>
+      <button class='video' value="video" alt="show video" style="display: none"/>
       {{^id}}
-        <a href='#' class='mbutton add'>add to list</a>
+        <button class='add' value="add to list" alt="add to list" />
       {{/id}}
-      <div class='mbutton time'>{{time}}</a>
     </div>
+    <div class='time'>{{time}}</div>
     <div class="time_display" style="display: none;">0:00</div>
 </script>
 
