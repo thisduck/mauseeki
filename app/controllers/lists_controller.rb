@@ -80,4 +80,29 @@ class ListsController < ApplicationController
       format.json { head :ok }
     end
   end
+
+  def save
+    @list = List.find(params[:id])
+    return render :json => {} if @list.saved
+
+    @list.update_attributes(:name => params[:list][:name], :saved => true)
+    return render :json => @list
+  end
+
+  def add_clip
+    list = List.find(params[:list_id]) if !params[:list_id].blank?
+    list = List.new if !list
+
+    cd = params[:clip]
+    clip = Clip.where(:source => cd[:source], :source_id => cd[:source_id]).first
+    if !clip
+      clip = Clip.new(cd)
+      clip.save
+    end
+
+    list.clips << clip
+    list.save
+
+    render :json => {:list => list, :clip => clip}
+  end
 end
