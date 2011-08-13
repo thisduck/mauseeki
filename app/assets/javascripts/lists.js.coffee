@@ -116,6 +116,9 @@ class mauseeki.views.ClipView extends Backbone.View
   events:
     'click .play': 'play'
     'click .pause': 'pause'
+    'click .status': 'seek'
+    'mousemove .status': 'show_timetip'
+    'mouseout .status': 'hide_timetip'
 
   initialize: -> 
     _.bindAll @, "playing"
@@ -127,7 +130,11 @@ class mauseeki.views.ClipView extends Backbone.View
     @player.bind "playing", @playing
 
   play: ->
-    @player.load(@id).play()
+    #TODO: make trigger
+    $(".clip .pause").hide()
+    $(".clip .play").show()
+
+    @player.pause().load(@id).play()
     @$(".pause").show()
     @$(".play").hide()
     false
@@ -137,6 +144,34 @@ class mauseeki.views.ClipView extends Backbone.View
     @$(".pause").hide()
     @$(".play").show()
     false
+
+  seek: ->
+    return if @player.current_id() != @id
+    @player.seek @hover_time
+    false
+
+  show_timetip: (e) ->
+    return if @player.current_id() != @id
+    player = @player.player
+    return false if !(player && player.getDuration && player.getDuration() > 0)
+
+    $status = @$(".status")
+    w = $status.width()
+    x = e.pageX - $status.get(0).offsetLeft
+    y = e.pageY - $status.get(0).offsetTop
+
+    hover = parseInt( (x/w) * player.getDuration())
+    return if hover <= 0
+    @hover_time = hover
+
+    td = @$(".time_display")
+    top = $status.get(0).offsetTop - (td.height() * 1.5)
+    td.css position: 'absolute', top: top, left: e.pageX - (td.width() / 2)
+    td.html(mauseeki.format_time(hover)).show()
+
+    false
+
+  hide_timetip: -> @$(".time_display").hide()
 
   playing: (id) ->
     return if @id != id
