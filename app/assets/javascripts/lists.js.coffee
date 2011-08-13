@@ -30,47 +30,59 @@ mauseeki.template =
     $(@cache[name](data))
 
 class mauseeki.views.FinderView extends Backbone.View
-  events: {}
+  last_value: ""
+  events:
+    'keyup #find': 'look'
+    'click .clear': 'clear'
+
   initialize: ->
-    _.bindAll @, "reset_clips", "add_clip"
+    _.bindAll @, "reset_clips", "add_clip", "run_search", "clear"
     $(@el).html mauseeki.template.$("finder")
-    @find = @$("#find")
+    @find = @$("#find").focus()
+    @button = @$("button")
 
     @clips = new mauseeki.models.Clips
     @clips.bind "reset", @reset_clips
     @clips.bind "add", @add_clip
 
-    @find.autocomplete(
-      source: "/clips/livesuggest"
-      select: (e, ui) =>
-        @run_search() #if 13 != (e.keyCode || e.which)
+  look: -> 
+    value = $.trim @find.val()
+    return if value == @last_value
+    @last_value = @find.val()
+    @interval = setInterval(@run_search, 300) if !@interval
 
-      open: (e, ui) =>
-#        @hide_autocomplete() if @live_string == @results_string
-
-#     ).keypress( (e) =>
-#       @live_string = @find.val()
-#       if 13 == (e.keyCode || e.which)
-#         @hide_autocomplete()
-#         @run_search()
-# 
-    ).focus()
+  clear: ->
+    clearInterval(@interval)
+    @interval = undefined
+    @last_search = undefined
+    @last_value = ""
+    @button.removeClass("clear").removeClass("loading")
+    @$("#results").empty()
+    @find.val("").focus()
 
   run_search: ->
-    query = @find.val()
-    $.ajax
-      url: '/clips/search'
-      data: { query: query }
+    query = $.trim @find.val()
+    return @clear() if query == ""
+    return if query == @last_search
+    @last_search = query
+
+    @loading.abort() if @loading
+
+    @button.addClass("loading").removeClass("clear")
+    console.log "running for: #{query}"
+    @loading = $.ajax
+      url: '/clips/results'
+      data: { q: query }
       success: (data) =>
+        clearInterval(@interval)
+        @interval = undefined
+        @button.removeClass("loading").addClass("clear")
+        @loading = undefined
         @clips.reset(data)
-        @hide_autocomplete()
-        @results_string = query
-        #console.log(@clips_view.clips.length)
 
       dataType: 'json'
       type: 'get'
 
-  hide_autocomplete: -> @find.autocomplete('widget').hide()
   reset_clips: (clips) ->
     @$("#results").empty()
     clips.each @add_clip

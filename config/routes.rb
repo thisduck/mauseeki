@@ -3,10 +3,12 @@ Mdot::Application.routes.draw do
     post 'add_clip', :on => :collection
     post 'save', :on => :member
   end
+
   resources :clips do
+    get 'results', :on => :collection
     get 'search', :on => :collection
     get 'livesuggest', :on => :collection
-  end   
+  end
 
   match '/' => 'lists#new'
 

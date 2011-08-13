@@ -1,3 +1,8 @@
+<div id="preload" style="display: none">
+  <img src="/assets/loader.gif" />
+  <img src="/images/raster/black/x_14x14.png" />
+</div>
+
 <div id="container">
 </div>
 
@@ -5,7 +10,10 @@
   <div id="finder" class="finder">
     <div class="search-field">
         <label for='find'>Find Clip</label>
-        <input id='find' name='query' type='text'/>
+        <fieldset>
+          <input id='find' name='query' type='text' autocomplete='off' />
+          <button value="clear" type="button" />
+        </fieldset>
     </div>
 
     <div class="finder-list">
@@ -44,6 +52,7 @@
   $(function() {
     var view = new mauseeki.views.FinderView;
     $("#container").append(view.el);
+    view.$("#find").focus();
 
     mauseeki.player = new mauseeki.views.PlayerView;
   });

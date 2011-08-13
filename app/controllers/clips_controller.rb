@@ -88,4 +88,9 @@ class ClipsController < ApplicationController
   def search
     render :json => Clip.youtube_search(params[:query])
   end
+
+  def results
+    live = Clip.live_suggest(params[:q]) || [params[:q]]
+    render :json => Clip.youtube_search(live.first || params[:q])
+  end
 end
