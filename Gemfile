@@ -9,6 +9,8 @@ gem 'youtube-g'
 gem 'xml-simple'
 gem 'bson_ext'
 gem 'mongo_mapper'
+gem 'thin'
+gem 'foreman'
 
 
 # Gems used only for assets and not required
