@@ -1,10 +1,63 @@
+<%= File.read "#{Rails.root}/vendor/assets/stylesheets/bootstrap.less" %>
+
 html {
   overflow-y: scroll;
+}
+
+body {
+  background-color: #FFFCEF;
+}
+
+h3 {
+  font-family: Allerta, Arial;
 }
 
 label {
   font-family: Allerta, Arial;
   font-size: 14px;
+}
+
+input[type='text'] {
+  .border-radius(3px);
+  padding: 8px;
+  border: 1px solid #222;
+}
+
+
+#header {
+  font: 13px/1.5 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;
+  background-color: #222;
+  border-bottom: 2px solid gray;
+  margin-bottom: 20px;
+  a {
+    text-decoration: none;
+  }
+
+  h1 {
+    color: #EEDD88;
+    margin: 0;
+    margin-left: 10px;
+  }
+
+  #logo {
+    .container;
+    margin: 0 auto;
+    h1 {
+      margin: 0;
+    }
+  }
+}
+
+#container {
+  .container;
+  margin: 0 auto;
+}
+#main {
+  .columns(12);
+}
+
+#sidebar {
+  .columns(4);
 }
 
 .yt_holder {
@@ -16,7 +69,8 @@ label {
 }
 
 .finder {
-  width: 500px;
+  .columns(8);
+  .border-radius(10px);
   margin-left: 0;
   background-color: #EEDD88;
   padding: 12px 20px;
@@ -27,6 +81,7 @@ label {
     }
 
     fieldset {
+      .border-radius(3px);
       border: 1px solid black;
       width: 95%;
       background: white;
@@ -52,7 +107,6 @@ label {
         font-size: 16px;
         border: none;
         outline: none;
-        padding: 3px;
 
         &.loading {
         }
@@ -67,6 +121,7 @@ ul {
 }
 
 .clip {
+  .border-radius(3px);
   width: 425px;
   background: #F5F3EF;
   padding: 10px;
@@ -74,6 +129,7 @@ ul {
   border: 1px solid #222;
 
   h2 {
+    margin-top: 0;
     font-size: 12px;
   }
 
@@ -100,6 +156,7 @@ ul {
 
   .controls {
     display: inline;
+    margin: 10px 0px;
 
     button {
       width: 24px;
@@ -138,4 +195,9 @@ ul {
     font-size: 10px;
     padding: 1px 2px;
   }
+}
+
+h2#go-ahead {
+  font-family: 'Just Another Hand';
+  font-size: 90px;
 }

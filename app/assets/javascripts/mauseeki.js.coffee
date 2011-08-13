@@ -310,7 +310,7 @@ class mauseeki.views.ListView extends Backbone.View
 
     if @model.get "saved"
       @$(".list-controls").hide()
-      mauseeki.app.navigate "lists/#{@model.id}-#{@model.get "name"}"
+      mauseeki.app.navigate "lists/#{@model.id}"
     else
       @$(".list-controls").show()
 
@@ -326,25 +326,33 @@ class mauseeki.views.ListView extends Backbone.View
     @$(".clips").empty()
     @clips.each @add_clip
 
+class mauseeki.views.ListsView extends Backbone.View
+
 class mauseeki.App extends Backbone.Router
   routes:
     "": "home"
     "lists/:id-:name": "list"
+    "lists/:id": "list"
 
   initialize: ->
     # setup the app here
     mauseeki.player = new mauseeki.views.PlayerView
 
+    lists_view = new mauseeki.views.ListsView
   home: ->
+    $("#main").html("<h2 id='go-ahead'>Go Ahead, Make A List.</h2>")
+
     list = new mauseeki.models.List
     list_view = new mauseeki.views.ListView model: list
-    $("#container").append list_view.el
+    $("#main").append list_view.el
 
     finder_view = new mauseeki.views.FinderView list: list
-    $("#container").append finder_view.el
+    $("#main").append finder_view.el
     finder_view.$("#find").focus()
 
   list: (id, name) ->
+    $("#main").empty()
+
     list = new mauseeki.models.List id: id
     list_view = new mauseeki.views.ListView model: list
     $("#container").append list_view.el
