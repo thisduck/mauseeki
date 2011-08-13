@@ -80,4 +80,12 @@ class ClipsController < ApplicationController
       format.json { head :ok }
     end
   end
+
+  def livesuggest
+    render :json => Clip.live_suggest(params[:term])
+  end
+
+  def search
+    render :json => Clip.youtube_search(params[:query])
+  end
 end

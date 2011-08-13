@@ -1,5 +1,23 @@
-<h1>New list</h1>
+<div id="container">
+</div>
 
-<%= render 'form' %>
+<script type="text/html" id="tmpl_finder">
+  <div id="finder" class="finder">
+    <div class="search-field">
+        <label for='find'>Find Clip</label>
+        <input id='find' name='query' type='text'/>
+    </div>
 
-<%= link_to 'Back', lists_path %>
+    <div class="finder-list">
+      <ul id="results" class='clips'>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script type="text/javascript">
+  $(function() {
+    var view = new mauseeki.views.FinderView({});
+    $("#container").append(view.el);
+  });
+</script>

@@ -1,7 +1,14 @@
 Mdot::Application.routes.draw do
-  resources :clips
+  resources :lists do
+    post 'add_clip', :on => :collection
+    post 'save', :on => :member
+  end
+  resources :clips do
+    get 'search', :on => :collection
+    get 'livesuggest', :on => :collection
+  end   
 
-  resources :lists
+  match '/' => 'lists#new'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
