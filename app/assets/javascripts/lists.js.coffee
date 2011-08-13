@@ -102,7 +102,7 @@ class mauseeki.views.PlayerView extends Backbone.View
     window.onYouTubePlayerReady = (player_id) =>
       @player = document.getElementById 'ytplayer'
       @player.setVolume(100)
-      setInterval @playing, 10
+      setInterval @playing, 200
 
     oid = "W1L1cE4Qez0"
     swfobject.embedSWF("http://www.youtube.com/v/#{oid}?enablejsapi=1&playerapiid=ytplayer",
@@ -114,6 +114,8 @@ class mauseeki.views.PlayerView extends Backbone.View
 
   load: (id) -> 
     return @ if @current_id() == id
+
+    @seek(0)
     @player.loadVideoById id, 0, "small"
     @
 
