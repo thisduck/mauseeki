@@ -1,4 +1,4 @@
-if ENV['MONGOHQ_URL']
+if ENV['MONGOLAB_URI']
   MongoMapper.config = {RAILS_ENV => {'uri' => ENV['MONGOHQ_URL']}}
   MongoMapper.connect(RAILS_ENV)
 else
