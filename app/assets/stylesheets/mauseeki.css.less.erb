@@ -51,6 +51,7 @@ input[type='text'] {
 #container {
   .container;
   margin: 0 auto;
+  margin-bottom: 130px;
 }
 #main {
   .columns(11);
@@ -135,6 +136,7 @@ ul {
   padding: 10px;
   margin: 10px 0px;
   border: 1px solid #222;
+  position: relative;
 
   h2 {
     margin-top: 0;
@@ -173,6 +175,7 @@ ul {
       margin-right: 10px;
     }
 
+
     .play {
       background: url('/images/raster/black/play_18x24.png') transparent no-repeat right center;
     }
@@ -202,6 +205,39 @@ ul {
     border: 1px solid gray;
     font-size: 10px;
     padding: 1px 2px;
+  }
+
+  &:hover {
+    .edit {
+      display: block;
+    }
+  }
+
+  .edit {
+    display: none;
+    position:absolute;
+    top: 9px;
+    right: 0px;
+
+    button, .move {
+      float: left;
+      width: 16px;
+      height: 16px;
+      border: none;
+      margin-right: 10px;
+    }
+
+    .move {
+      background: url('/images/raster/black/move_16x16.png') transparent no-repeat right center;
+    }
+
+    .delete {
+      background: url('/images/raster/black/x_alt_16x16.png') transparent no-repeat right center;
+
+      &:hover {
+        background-image: url('/images/raster/red/x_alt_16x16.png');
+      }
+    }
   }
 }
 

@@ -20,6 +20,16 @@ class mauseeki.views.ListView extends Backbone.View
 
     @model.load()
 
+    @$(".clips").sortable
+      handle: ".move"
+      update: =>
+        ids = _.map @$(".clips .clip"), (clip) -> $(clip).attr("data-id")
+        $.ajax
+          type: 'post'
+          url: "/lists/#{@model.id}/order"
+          data: list: order: ids
+
+
   relist: ->
     in_memory = mauseeki.app.lists.get(@model.id) || @model.get "mine"
     name = @model.get "name"
@@ -37,7 +47,7 @@ class mauseeki.views.ListView extends Backbone.View
     @model.save_list(name)
 
   add_clip: (clip) ->
-    view = new mauseeki.views.ClipView model: clip
+    view = new mauseeki.views.ClipView model: clip, list: @model
     @$(".clips").append view.el
 
   reset_clips: ->

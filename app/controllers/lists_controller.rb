@@ -21,7 +21,7 @@ class ListsController < ApplicationController
         @list = List.find(params[:id])
 
         if params[:load]
-          return render json: {list: @list, clips: @list.clips}
+          return render json: {list: @list, clips: @list.sorted_clips}
         else
           return render json: @list
         end
@@ -97,6 +97,12 @@ class ListsController < ApplicationController
     return render :json => @list
   end
 
+  def order
+    @list = List.find(params[:id])
+    @list.update_attributes(:order => params[:list][:order])
+    return render :json => @list
+  end
+
   def add_clip
     list = List.find(params[:list_id]) if !params[:list_id].blank?
     list = List.new if !list
@@ -112,5 +118,18 @@ class ListsController < ApplicationController
     list.save
 
     render :json => {:list => list, :clip => clip}
+  end
+
+  def remove_clip
+    list = List.find(params[:id])
+
+    clip = Clip.find(params[:clip_ids])
+    if clip
+      list.clip_ids.delete clip.id
+      list.order.delete clip.id.to_s
+      list.save
+    end
+
+    render :json => {:list => list}
   end
 end

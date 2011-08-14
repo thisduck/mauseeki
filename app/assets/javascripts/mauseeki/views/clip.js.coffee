@@ -10,23 +10,29 @@ class mauseeki.views.ClipView extends Backbone.View
     'click .status': 'seek'
     'click .video': 'video'
     'click .add': 'add'
+    'click .delete': 'delete'
     'mousemove .status': 'show_timetip'
     'mouseout .status': 'hide_timetip'
 
   initialize: (options = {}) ->
-    _.bindAll @, "playing", "render"
+    _.bindAll @, "playing", "render", "remove_clip"
     @player = mauseeki.player
     @player.bind "playing", @playing
 
     @list = options.list
+    if @list
+      @list.clips.bind "remove", @remove_clip
     @render()
 
   render: ->
     if @model
       $(@el).html mauseeki.template.$ "clip", @model.toJSON()
+      $(@el).attr "data-id", @model.id
       @id = @model.get("source_id")
+      if @list
+        in_memory = mauseeki.app.lists.get(@list.id) || @list.get "mine"
+        @$(".edit").remove() if !in_memory
     @
-
 
   play: ->
     mauseeki.trigger "clip:play", @
@@ -106,4 +112,7 @@ class mauseeki.views.ClipView extends Backbone.View
     @pause() if playing == 1 && player.getPlayerState() == 0
 
   add: -> @list.add_clip(@model) if @list
-
+  delete: -> @list.remove_clip(@model) if @list
+  remove_clip: (clip) ->
+    return if clip.id != @model.id
+    $(@el).fadeOut => @remove()

@@ -1,7 +1,9 @@
 Mdot::Application.routes.draw do
   resources :lists do
     post 'add_clip', :on => :collection
+    post 'remove_clip', :on => :member
     post 'save', :on => :member
+    post 'order', :on => :member
   end
 
   resources :clips do
