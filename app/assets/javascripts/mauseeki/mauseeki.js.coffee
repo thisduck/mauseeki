@@ -21,6 +21,9 @@ mauseeki.template =
 mauseeki.views = {}
 mauseeki.models = {}
 
+_.extend mauseeki, Backbone.Events
+
+
 class mauseeki.App extends Backbone.Router
   routes:
     "": "home"
@@ -28,11 +31,23 @@ class mauseeki.App extends Backbone.Router
     "lists/:id": "list"
 
   initialize: ->
-    _.bindAll @, "list_added", "persist"
+    _.bindAll @, "list_added", "persist_lists", "load_lists"
     # setup the app here
     mauseeki.player = new mauseeki.views.PlayerView
 
     @lists = new mauseeki.models.Lists
+    @load_lists()
+
+    @bind "list_added", @list_added
+    @lists.bind 'change', @persist_lists
+
+    @lists_view = new mauseeki.views.ListsView lists: @lists
+    $("#sidebar").append(@lists_view.render().el)
+
+    @site_player_view = new mauseeki.views.SitePlayerView
+    $("#site_player_container").append(@site_player_view.el)
+
+  load_lists: ->
     list_ids = store.get "list_ids"
     array = []
     _.each list_ids, (id) ->
@@ -41,13 +56,7 @@ class mauseeki.App extends Backbone.Router
       array.push list
     @lists.reset array
 
-    @bind "list_added", @list_added
-    @lists.bind 'change', @persist
-
-    @lists_view = new mauseeki.views.ListsView lists: @lists
-    $("#sidebar").append(@lists_view.render().el)
-
-  persist: -> store.set "list_ids", @lists.pluck("id")
+  persist_lists: -> store.set "list_ids", @lists.pluck("id")
 
   home: ->
     $("#main").html("<h2 id='go-ahead'>Go Ahead, Make A List.</h2>")

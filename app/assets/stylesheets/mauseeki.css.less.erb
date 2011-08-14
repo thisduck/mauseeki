@@ -209,3 +209,54 @@ h2#go-ahead {
   font-family: 'Just Another Hand';
   font-size: 90px;
 }
+
+#site_player_container {
+  color: #F5F3EF;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  border-top: 2px solid gray;
+  background-color: #222;
+
+  .clip {
+    width: 800px;
+    background: transparent;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    position: relative;
+
+    .status {
+      width: 600px;
+      float: right;
+      margin-right: 100px;
+    }
+
+    .controls {
+      display: inline;
+      float: left;
+      margin: 0px;
+      margin-bottom: 15px;
+
+      .play {
+        background: url('/images/raster/orange/play_18x24.png') transparent no-repeat right center;
+      }
+
+      .pause {
+        background: url('/images/raster/orange/pause_18x24.png') transparent no-repeat right center;
+      }
+
+      .add {
+        background: url('/images/raster/orange/plus_24x24.png') transparent no-repeat right center;
+      }
+
+      .video {
+        background: url('/images/raster/orange/movie_24x24.png') transparent no-repeat right center;
+      }
+    }
+
+    .time {
+      position: absolute;
+      right: 0;
+    }
+  }
+}
