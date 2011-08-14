@@ -35,7 +35,8 @@ class mauseeki.models.List extends Backbone.Model
   remove_clip: (clip) ->
     $.ajax
       url: "/lists/#{@id}/remove_clip"
-      data: clip_id: clip.id
+      data: 
+        clip_id: clip.id
       success: (data) =>
         c = @clips.get(clip.id)
         @clips.remove(clip) if c

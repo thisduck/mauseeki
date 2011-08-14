@@ -15,7 +15,7 @@ class mauseeki.views.ClipView extends Backbone.View
     'mouseout .status': 'hide_timetip'
 
   initialize: (options = {}) ->
-    _.bindAll @, "playing", "render", "remove_clip"
+    _.bindAll @, "playing", "render", "remove_clip", "next", "play"
     @player = mauseeki.player
     @player.bind "playing", @playing
 
@@ -32,6 +32,8 @@ class mauseeki.views.ClipView extends Backbone.View
       if @list
         in_memory = mauseeki.app.lists.get(@list.id) || @list.get "mine"
         @$(".edit").remove() if !in_memory
+
+      @model.bind "play", @play
     @
 
   play: ->
@@ -40,6 +42,7 @@ class mauseeki.views.ClipView extends Backbone.View
     $(".clip .pause").hide()
     $(".clip .play").show()
 
+    @auto_pause = false
     @player.pause().load(@id).play()
     @$(".pause").show()
     @$(".play").hide()
@@ -51,6 +54,7 @@ class mauseeki.views.ClipView extends Backbone.View
 
   seek: ->
     return if @player.current_id() != @id
+    @auto_pause = false
     @player.seek @hover_time
 
   video: -> @player.toggle_video()
@@ -70,8 +74,8 @@ class mauseeki.views.ClipView extends Backbone.View
     @hover_time = hover
 
     td = @$(".time_display")
-    top = $status.offset().top - (td.height() * 1.5)
-    td.css position: 'absolute', top: top, left: e.pageX - (td.width() / 2)
+    top = $status.position().top - (td.height() * 1.5)
+    td.css position: 'absolute', top: top, left: x - (td.width() / 2)
     td.html(mauseeki.format_time(hover)).show()
 
     false
@@ -109,10 +113,19 @@ class mauseeki.views.ClipView extends Backbone.View
     @$(".loaded").css "margin-left", sw if @$(".loaded").css("margin-left") != sw
     @$(".loaded").width lw if @$(".loaded").width() != lw
 
-    @pause() if playing == 1 && player.getPlayerState() == 0
+    if playing == 1 && player.getPlayerState() == 0 && !@auto_pause
+      @auto_pause = true
+      @pause()
+      @next()
 
   add: -> @list.add_clip(@model) if @list
   delete: -> @list.remove_clip(@model) if @list
   remove_clip: (clip) ->
     return if clip.id != @model.id
     $(@el).fadeOut => @remove()
+
+  next: ->
+    return if !@list
+    index = @list.clips.indexOf(@model)
+    clip = @list.clips.at(index + 1)
+    clip.trigger("play") if clip

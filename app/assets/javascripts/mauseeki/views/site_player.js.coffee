@@ -12,4 +12,5 @@ class mauseeki.views.SitePlayerView extends mauseeki.views.ClipView
     return if @model?.id == view.model.id
     @model = view.model
     @render()
+    @model.unbind "play", @play
     @$(".video").show()

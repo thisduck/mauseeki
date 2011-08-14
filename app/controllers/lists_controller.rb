@@ -123,7 +123,7 @@ class ListsController < ApplicationController
   def remove_clip
     list = List.find(params[:id])
 
-    clip = Clip.find(params[:clip_ids])
+    clip = Clip.find(params[:clip_id])
     if clip
       list.clip_ids.delete clip.id
       list.order.delete clip.id.to_s
