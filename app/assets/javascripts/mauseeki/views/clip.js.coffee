@@ -62,15 +62,15 @@ class mauseeki.views.ClipView extends Backbone.View
 
     $status = @$(".status")
     w = $status.width()
-    x = e.pageX - $status.get(0).offsetLeft
-    y = e.pageY - $status.get(0).offsetTop
+    x = e.pageX - $status.offset().left
+    y = e.pageY - $status.offset().top
 
     hover = parseInt( (x/w) * player.getDuration())
     return if hover <= 0
     @hover_time = hover
 
     td = @$(".time_display")
-    top = $status.get(0).offsetTop - (td.height() * 1.5)
+    top = $status.offset().top - (td.height() * 1.5)
     td.css position: 'absolute', top: top, left: e.pageX - (td.width() / 2)
     td.html(mauseeki.format_time(hover)).show()
 
