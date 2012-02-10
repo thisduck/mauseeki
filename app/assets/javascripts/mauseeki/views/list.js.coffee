@@ -3,6 +3,8 @@ mauseeki = @mauseeki
 class mauseeki.views.ListView extends Backbone.View
   events:
     "click .save-list": "save_list"
+    "focus #list_name": "clear_list_name"
+    "blur #list_name": "set_list_name"
 
   initialize: -> 
     _.bindAll @, 'add_clip', 'reset_clips', 'relist'
@@ -53,6 +55,15 @@ class mauseeki.views.ListView extends Backbone.View
   reset_clips: ->
     @$(".clips").empty()
     @clips.each @add_clip
+
+  clear_list_name: ->
+    if @$("#list_name").val() is mauseeki.models.List::default_name
+      @$("#list_name").val('')
+
+  set_list_name: ->
+    if @$("#list_name").val() is ''
+      @$("#list_name").val mauseeki.models.List::default_name
+
 
 class mauseeki.views.ListsView extends Backbone.View
   className: 'lists-view'
