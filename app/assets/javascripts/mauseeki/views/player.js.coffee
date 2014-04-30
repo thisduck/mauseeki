@@ -18,7 +18,7 @@ class mauseeki.views.PlayerView extends Backbone.View
 
   playing: -> @trigger "playing", @current_id()
 
-  current_id: -> @player?.getVideoUrl().match(/v=(.*)&/)[1]
+  current_id: -> @player?.getVideoUrl().match(/v=(.*)&?/)[1]
 
   load: (id) -> 
     return @ if @current_id() == id
